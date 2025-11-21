@@ -10,7 +10,7 @@
             --text-color: #e2e8f0;
             --accent-cyan: #06b6d4;
             --accent-pink: #ec4899;
-            --glass: rgba(15, 23, 42, 0.85);
+            --glass: rgba(15, 23, 42, 0.95);
         }
 
         * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -18,13 +18,13 @@
         body {
             background-color: var(--bg-color);
             color: var(--text-color);
-            font-family: 'Roboto Mono', 'Courier New', monospace;
-            overflow: hidden; /* Canvas covers everything */
+            font-family: 'Roboto Mono', monospace;
+            overflow: hidden;
             height: 100vh;
             width: 100vw;
         }
 
-        /* The Canvas is the background and the interaction layer */
+        /* Canvas handles the arm, blocks, and background */
         canvas {
             position: absolute;
             top: 0;
@@ -32,105 +32,56 @@
             z-index: 1;
         }
 
-        /* UI Overlay */
+        /* UI Overlay for non-canvas elements */
         #ui-layer {
             position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
+            top: 0; left: 0; width: 100%; height: 100%;
             z-index: 2;
-            pointer-events: none; /* Let clicks pass through to canvas */
-            display: flex;
-            flex-direction: column;
-            justify-content: space-between;
+            pointer-events: none; /* Let clicks hit canvas */
             padding: 2rem;
         }
 
-        header {
-            pointer-events: auto;
-        }
+        header { pointer-events: auto; }
+        h1 { font-size: 2rem; text-transform: uppercase; letter-spacing: -1px; color: var(--accent-cyan); }
+        h2 { font-size: 1rem; color: var(--text-color); margin-top: 0.5rem; }
 
-        h1 {
-            font-size: 2.5rem;
-            text-transform: uppercase;
-            letter-spacing: -2px;
-        }
-
-        h2 {
-            color: var(--accent-cyan);
-            font-size: 1.2rem;
-            margin-top: 0.5rem;
-        }
-
-        .subtitle {
-            font-size: 0.9rem;
-            color: #94a3b8;
-            margin-top: 0.2rem;
-        }
-
-        /* The Info Card that appears when a node is clicked */
-        #info-card {
+        /* The Info Modal Pop-up */
+        #modal-overlay {
             position: absolute;
-            right: 2rem;
-            top: 50%;
-            transform: translateY(-50%) translateX(120%); /* Hidden by default */
-            width: 400px;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.7);
+            z-index: 10;
+            display: none;
+            justify-content: center;
+            align-items: center;
+            pointer-events: auto;
+            backdrop-filter: blur(5px);
+        }
+        #modal-overlay.active { display: flex; }
+
+        #info-card {
+            width: 600px;
+            max-width: 90%;
             background: var(--glass);
-            border: 1px solid var(--accent-cyan);
-            padding: 2rem;
-            border-radius: 8px;
-            backdrop-filter: blur(10px);
-            transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-            pointer-events: auto;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+            border: 2px solid var(--accent-cyan);
+            padding: 2.5rem;
+            border-radius: 12px;
+            box-shadow: 0 0 50px rgba(6, 182, 212, 0.3);
+            position: relative;
         }
 
-        #info-card.active {
-            transform: translateY(-50%) translateX(0);
+        #close-btn {
+            position: absolute; top: 1rem; right: 1rem;
+            background: none; border: 1px solid var(--accent-pink);
+            color: var(--accent-pink); padding: 5px 10px; cursor: pointer;
+            font-family: inherit;
         }
+        #close-btn:hover { background: var(--accent-pink); color: var(--bg-color); }
 
-        #info-card h3 {
-            color: var(--accent-pink);
-            margin-bottom: 1rem;
-            border-bottom: 1px solid #334155;
-            padding-bottom: 0.5rem;
-        }
-
-        #info-card p {
-            font-size: 0.9rem;
-            line-height: 1.6;
-            margin-bottom: 1rem;
-            color: #cbd5e1;
-        }
-
-        #info-card ul {
-            list-style-type: square;
-            margin-left: 1.5rem;
-            margin-bottom: 1rem;
-            font-size: 0.9rem;
-        }
-
-        #info-card .math {
-            background: rgba(255,255,255,0.05);
-            padding: 0.5rem;
-            border-radius: 4px;
-            font-style: italic;
-            text-align: center;
-            margin: 1rem 0;
-            font-family: serif;
-        }
-
-        #controls {
-            font-size: 0.8rem;
-            color: #64748b;
-            pointer-events: auto;
-        }
-        
-        .key {
-            color: var(--accent-cyan);
-            font-weight: bold;
-        }
+        #info-card h3 { color: var(--accent-cyan); margin-bottom: 1.5rem; font-size: 1.5rem; border-bottom: 1px solid #334155; padding-bottom: 0.5rem;}
+        #info-card p, #info-card li { font-size: 1rem; line-height: 1.7; color: #cbd5e1; margin-bottom: 1rem; }
+        #info-card ul { margin-left: 1.5rem; }
+        .block-label { font-weight: bold; letter-spacing: 1px; }
     </style>
 </head>
 <body>
@@ -139,195 +90,134 @@
 
     <div id="ui-layer">
         <header>
-            <h1>Your Name</h1>
-            <h2>Oxford Robotics Institute</h2>
-            <div class="subtitle">PhD Candidate | Fundamental AI & Robot Learning</div>
+            <h1>[Your Name]</h1>
+            <h2>Oxford Robotics Institute | Fundamental AI</h2>
         </header>
-
-        <div id="info-card">
-            <h3 id="card-title">Title</h3>
-            <div id="card-content">Content goes here.</div>
+        <div style="position:absolute; bottom: 2rem; left: 2rem; color: #64748b; font-size: 0.8rem;">
+            > SYSTEM STATUS: ARM_IDLE<br>
+            > INSTRUCTION: CLICK DATA BLOCK FOR ANALYSIS
         </div>
+    </div>
 
-        <div id="controls">
-            <p>> INTERACTION MODE: <span class="key">SPRING_DAMPING</span></p>
-            <p>> STATUS: <span class="key">AWAITING_MANIPULATION</span></p>
-            <p>> DRAG NODES TO OBSERVE FORCES. CLICK TO INSPECT.</p>
+    <div id="modal-overlay">
+        <div id="info-card">
+            <button id="close-btn">CLOSE [X]</button>
+            <h3 id="card-title">Title</h3>
+            <div id="card-content">Content.</div>
         </div>
     </div>
 
     <script>
-        /* --- PHYSICS ENGINE CONFIGURATION --- 
-           Simulating identifiable representations and physical mechanisms.
-        */
+        // --- CONFIGURATION & DATA ---
         const config = {
-            particleRadius: 60,
-            springK: 0.05,       // Spring constant (Stiffness)
-            friction: 0.92,      // Damping factor
-            mouseInteractionDist: 150,
-            repulsion: 500
+            armColor: '#06b6d4', // Cyan
+            accentColor: '#ec4899', // Pink
+            bgColor: '#0f172a',
+            blockWidth: 120,
+            blockHeight: 50,
         };
 
-        // CV Content Data - "The Identifiable Representations"
-        const nodesData = [
-            {
-                id: 'research',
-                label: 'RESEARCH',
-                title: 'Fundamental AI',
-                content: `
-                    <p>My work focuses on <strong>provably learning physical mechanisms</strong> from raw observation.</p>
-                    <p>I investigate how neural networks can recover identifiable representations of physical parameters (mass, friction, spring constants) without explicit supervision.</p>
-                    <div class="math">L(θ) = || F_pred - F_gt ||² + λ || z - z* ||²</div>
-                `
+        const contentData = {
+            'RESEARCH': {
+                title: 'Fundamental AI Research',
+                content: `<p>Focusing on <strong>provably learning physical mechanisms</strong> (mass, friction, spring constants) from observation.</p><p>Developing methods to recover <strong>identifiable representations</strong> in latent spaces, moving beyond pure reconstruction losses to ensure latent variables correspond to ground-truth physical parameters.</p>`
             },
-            {
-                id: 'robotics',
-                label: 'ROBOTICS',
-                title: 'Robot Learning',
-                content: `
-                    <p>Applying theoretical guarantees to real-world <strong>Bimanual Manipulation</strong>.</p>
-                    <ul>
-                        <li>Deformable object manipulation</li>
-                        <li>Dual-arm coordination via learned dynamics</li>
-                        <li>Sim-to-Real transfer of physics priors</li>
-                    </ul>
-                `
+            'PAPERS': {
+                title: 'Selected Publications',
+                content: `<ul><li>"Identifiable Representations for Bimanual Manipulation" (In Submission)</li><li>"Provable Learning of Hybrid Spring-Friction Systems" (NeurIPS Workshop)</li><li>"Dynamics-Aware Latent Spaces for Robot Control"</li></ul>`
             },
-            {
-                id: 'pubs',
-                label: 'PAPERS',
-                title: 'Publications',
-                content: `
-                    <p><strong>Recent Works:</strong></p>
-                    <ul>
-                        <li>"Provable Identifiability of Spring-Mass Systems" (NeurIPS)</li>
-                        <li>"Learning Friction Models for Dexterous Hands" (ICRA)</li>
-                        <li>"Invariant Representations in Bimanual Tasks" (RSS)</li>
-                    </ul>
-                `
+            'ROBOTS': {
+                title: 'Bimanual Manipulation',
+                content: `<p>Applying theoretical foundations to real-world dual-arm setups.</p><p>Areas of interest include manipulating deformable objects, contact-rich insertion tasks, and sim-to-real transfer using learned identifiable physics priors.</p>`
             },
-            {
-                id: 'contact',
-                label: 'CONTACT',
-                title: 'Get in Touch',
-                content: `
-                    <p>Interested in discussing identifiable AI or robotics?</p>
-                    <p><strong>Email:</strong> name@robots.ox.ac.uk</p>
-                    <p><strong>Twitter:</strong> @handle</p>
-                    <p><strong>Github:</strong> github.com/handle</p>
-                `
+            'CONTACT': {
+                title: 'Information Protocol',
+                content: `<p>Open to academic collaboration and discussion.</p><p><strong>Email:</strong> name@robots.ox.ac.uk</p><p><strong>GitHub / X:</strong> @handle</p>`
             }
-        ];
+        };
 
+        // --- SETUP ---
         const canvas = document.getElementById('simCanvas');
         const ctx = canvas.getContext('2d');
-        const card = document.getElementById('info-card');
-        const cardTitle = document.getElementById('card-title');
-        const cardContent = document.getElementById('card-content');
-
         let width, height;
-        let particles = [];
-        let mouse = { x: 0, y: 0, isDown: false, dragging: null };
+
+        // Robot State
+        const robot = {
+            base: { x: 0, y: 0 },
+            l1: 200, // Length of upper arm
+            l2: 180, // Length of forearm
+            theta1: Math.PI / 4, // Shoulder angle
+            theta2: -Math.PI / 2, // Elbow angle
+            gripperPos: { x: 0, y: 0 },
+            target: { x: 300, y: 300 }, // Where the gripper wants to go
+            state: 'IDLE', // IDLE, REACHING, GRIPPING, INSERTING, RETURNING
+            grippedBlock: null
+        };
+
+        // The "Neural Processor" Slot location
+        let processorSlot = { x: 0, y: 0, width: 140, height: 20 };
+
+        let blocks = [];
+        let mouse = { x: 0, y: 0 };
 
         // --- CLASSES ---
-
-        class Particle {
-            constructor(x, y, data) {
-                this.pos = { x: x, y: y };
-                this.vel = { x: (Math.random() - 0.5) * 2, y: (Math.random() - 0.5) * 2 };
-                this.acc = { x: 0, y: 0 };
-                this.mass = 10; // Arbitrary mass unit
-                this.radius = config.particleRadius;
-                this.data = data;
+        class Block {
+            constructor(label, x, y) {
+                this.label = label;
+                this.pos = { x, y };
+                this.initialPos = { x, y };
+                this.width = config.blockWidth;
+                this.height = config.blockHeight;
                 this.hovered = false;
             }
-
-            update() {
-                // Apply friction (Damping)
-                this.vel.x *= config.friction;
-                this.vel.y *= config.friction;
-
-                // Update Position
-                this.pos.x += this.vel.x;
-                this.pos.y += this.vel.y;
-
-                // Wall Collisions (Bouncing)
-                if (this.pos.x < this.radius) { this.pos.x = this.radius; this.vel.x *= -1; }
-                if (this.pos.x > width - this.radius) { this.pos.x = width - this.radius; this.vel.x *= -1; }
-                if (this.pos.y < this.radius) { this.pos.y = this.radius; this.vel.y *= -1; }
-                if (this.pos.y > height - this.radius) { this.pos.y = height - this.radius; this.vel.y *= -1; }
-
-                // Reset forces
-                this.acc.x = 0;
-                this.acc.y = 0;
-            }
-
-            applyForce(fx, fy) {
-                this.vel.x += fx / this.mass;
-                this.vel.y += fy / this.mass;
-            }
-
+            
             draw() {
-                // Draw Connections (Springs visual)
-                if (mouse.dragging === this) {
-                    ctx.beginPath();
-                    ctx.moveTo(this.pos.x, this.pos.y);
-                    ctx.lineTo(mouse.x, mouse.y);
-                    ctx.strokeStyle = '#06b6d4'; // Cyan for spring force
-                    ctx.setLineDash([5, 5]);
-                    ctx.stroke();
-                    ctx.setLineDash([]);
-                    
-                    // Draw Force Vector Text
-                    ctx.fillStyle = '#06b6d4';
-                    ctx.font = '10px monospace';
-                    ctx.fillText('F_spring', (this.pos.x + mouse.x)/2, (this.pos.y + mouse.y)/2 - 10);
+                ctx.save();
+                ctx.translate(this.pos.x, this.pos.y);
+                
+                // Glow effect if hovered or gripped
+                if(this.hovered || robot.grippedBlock === this) {
+                    ctx.shadowColor = config.accentColor;
+                    ctx.shadowBlur = 20;
                 }
 
-                // Draw Node Body
-                ctx.beginPath();
-                ctx.arc(this.pos.x, this.pos.y, this.radius, 0, Math.PI * 2);
-                ctx.fillStyle = this.hovered || mouse.dragging === this ? 'rgba(15, 23, 42, 0.9)' : 'rgba(15, 23, 42, 0.6)';
-                ctx.fill();
+                // Block body
+                ctx.fillStyle = "rgba(6, 182, 212, 0.1)";
+                ctx.strokeStyle = (this.hovered || robot.grippedBlock === this) ? config.accentColor : config.armColor;
                 ctx.lineWidth = 2;
-                ctx.strokeStyle = this.hovered || mouse.dragging === this ? '#ec4899' : '#06b6d4'; // Pink active, Cyan idle
-                ctx.stroke();
+                ctx.fillRect(-this.width/2, -this.height/2, this.width, this.height);
+                ctx.strokeRect(-this.width/2, -this.height/2, this.width, this.height);
 
-                // Draw Label
-                ctx.fillStyle = '#fff';
+                // Label
+                ctx.fillStyle = config.armColor;
                 ctx.font = 'bold 14px Roboto Mono';
                 ctx.textAlign = 'center';
                 ctx.textBaseline = 'middle';
-                ctx.fillText(this.data.label, this.pos.x, this.pos.y);
+                ctx.fillText(this.label, 0, 0);
+                
+                // Tech detail lines
+                ctx.beginPath(); ctx.moveTo(-this.width/2, 0); ctx.lineTo(-this.width/2 + 10, 0); ctx.stroke();
+                ctx.beginPath(); ctx.moveTo(this.width/2, 0); ctx.lineTo(this.width/2 - 10, 0); ctx.stroke();
 
-                // Draw Math Decoration (identifiability)
-                ctx.fillStyle = 'rgba(255,255,255,0.3)';
-                ctx.font = 'italic 10px serif';
-                ctx.fillText(`z_${this.data.id}`, this.pos.x + 20, this.pos.y + 30);
+                ctx.restore();
             }
         }
 
-        // --- INITIALIZATION ---
+        // --- CORE FUNCTIONS ---
 
         function init() {
             resize();
-            particles = [];
+            // Initialize Blocks on the right side randomly vertically
+            const labels = Object.keys(contentData);
+            blocks = labels.map((label, i) => {
+                const x = width * 0.7;
+                // Spread them out vertically
+                const y = height * 0.2 + (i * (height * 0.6) / (labels.length - 1));
+                return new Block(label, x, y);
+            });
             
-            // Spawn particles in a grid or random layout
-            const centerX = width / 2;
-            const centerY = height / 2;
-            
-            // Position them nicely
-            const positions = [
-                {x: centerX - 150, y: centerY - 100},
-                {x: centerX + 150, y: centerY - 100},
-                {x: centerX - 150, y: centerY + 100},
-                {x: centerX + 150, y: centerY + 100}
-            ];
-
-            for(let i=0; i<nodesData.length; i++) {
-                particles.push(new Particle(positions[i].x, positions[i].y, nodesData[i]));
-            }
+            // Set initial rest position for robot
+            setRobotTarget(width * 0.3, height * 0.5);
         }
 
         function resize() {
@@ -335,145 +225,257 @@
             height = window.innerHeight;
             canvas.width = width;
             canvas.height = height;
+            // Robot base position on the left
+            robot.base = { x: 50, y: height / 2 };
+            // Processor slot bottom center
+            processorSlot.x = width / 2;
+            processorSlot.y = height - 100;
         }
 
-        // --- PHYSICS LOOP ---
+        // Simple 2D Inverse Kinematics (Law of Cosines)
+        function updateRobotIK() {
+            // Smooth movement towards target (P-controller-ish)
+            const speed = 0.08;
+            robot.gripperPos.x += (robot.target.x - robot.gripperPos.x) * speed;
+            robot.gripperPos.y += (robot.target.y - robot.gripperPos.y) * speed;
 
+            const dx = robot.gripperPos.x - robot.base.x;
+            const dy = robot.gripperPos.y - robot.base.y;
+            const dist = Math.sqrt(dx * dx + dy * dy);
+
+            // Clamp distance so arm doesn't break if target is too far
+            const maxReach = robot.l1 + robot.l2 - 10;
+            let reachFactor = 1.0;
+            if(dist > maxReach) {
+                 reachFactor = maxReach / dist;
+            }
+            
+            // Adjusted target based on reach capabilities
+            const adx = dx * reachFactor;
+            const ady = dy * reachFactor;
+            const adist = Math.sqrt(adx*adx + ady*ady);
+
+            // IK Math
+            // c2 = cosine of elbow angle
+            const c2 = (adist*adist - robot.l1*robot.l1 - robot.l2*robot.l2) / (2 * robot.l1 * robot.l2);
+            // Clamp c2 to [-1, 1] to avoid math errors
+            const c2Clamped = Math.max(-1, Math.min(1, c2));
+            // Elbow angle (s2 would be sine, we want "elbow up" configuration generally)
+            robot.theta2 = -Math.acos(c2Clamped); 
+
+            // Shoulder angle
+            const k1 = robot.l1 + robot.l2 * Math.cos(robot.theta2);
+            const k2 = robot.l2 * Math.sin(robot.theta2);
+            robot.theta1 = Math.atan2(ady, adx) - Math.atan2(k2, k1);
+        }
+
+        function setRobotTarget(x, y) {
+            robot.target.x = x;
+            robot.target.y = y;
+        }
+
+        function checkProximity(pos1, pos2, threshold) {
+            const dx = pos1.x - pos2.x;
+            const dy = pos1.y - pos2.y;
+            return Math.sqrt(dx*dx + dy*dy) < threshold;
+        }
+
+        // --- MAIN LOOP ---
         function animate() {
             ctx.clearRect(0, 0, width, height);
-
-            // Draw Background Grid (The "Workspace")
             drawGrid();
+            drawProcessorSlot();
+            
+            updateRobotIK();
+            drawRobot();
 
-            particles.forEach(p => {
-                
-                // 1. Mouse Interaction (Spring Force)
-                if (mouse.dragging === p) {
-                    const dx = mouse.x - p.pos.x;
-                    const dy = mouse.y - p.pos.y;
-                    // F = -kx
-                    const fx = dx * config.springK;
-                    const fy = dy * config.springK;
-                    p.applyForce(fx, fy);
+            // --- Interaction State Machine ---
+            if (robot.state === 'REACHING' && robot.grippedBlock) {
+                // Check if gripper reached the block
+                if (checkProximity(robot.gripperPos, robot.grippedBlock.pos, 20)) {
+                    robot.state = 'INSERTING';
+                    // Set target to processor slot
+                    setRobotTarget(processorSlot.x, processorSlot.y - 30);
                 }
+            }
+            
+            if (robot.state === 'INSERTING' && robot.grippedBlock) {
+                 // Lock block to gripper position
+                 robot.grippedBlock.pos.x = robot.gripperPos.x;
+                 robot.grippedBlock.pos.y = robot.gripperPos.y;
 
-                // 2. Inter-particle Repulsion (Prevent overlap)
-                particles.forEach(other => {
-                    if (other !== p) {
-                        const dx = p.pos.x - other.pos.x;
-                        const dy = p.pos.y - other.pos.y;
-                        const dist = Math.sqrt(dx*dx + dy*dy);
-                        const minDist = p.radius + other.radius + 20;
-                        
-                        if (dist < minDist) {
-                            const force = (minDist - dist) * 0.05;
-                            const fx = (dx / dist) * force;
-                            const fy = (dy / dist) * force;
-                            p.applyForce(fx * 10, fy * 10);
-                        }
-                    }
-                });
+                 // Check if reached slot
+                 if (checkProximity(robot.gripperPos, {x: processorSlot.x, y: processorSlot.y - 30}, 30)) {
+                     robot.state = 'RETURNING';
+                     showModal(robot.grippedBlock.label);
+                     // Drop block
+                     robot.grippedBlock = null;
+                     // Return to idle pose
+                     setRobotTarget(width * 0.3, height * 0.5);
+                 }
+            }
+             
+            if(robot.state === 'RETURNING') {
+                 if(checkProximity(robot.gripperPos, robot.target, 50)) {
+                     robot.state = 'IDLE';
+                     // Reset blocks to initial positions smoothly (optional polish, skipping for simpler code)
+                     blocks.forEach(b => b.pos = {...b.initialPos});
+                 }
+            }
 
-                p.update();
-                p.draw();
+
+            // Draw Blocks
+            blocks.forEach(b => {
+                b.draw();
             });
-
+            
             requestAnimationFrame(animate);
         }
 
+        // --- DRAWING FUNCTIONS ---
         function drawGrid() {
-            ctx.strokeStyle = 'rgba(255, 255, 255, 0.03)';
+            ctx.strokeStyle = 'rgba(255, 255, 255, 0.02)';
             ctx.lineWidth = 1;
             const gridSize = 50;
-            
-            // Draw Vertical Lines
             for(let x = 0; x < width; x += gridSize) {
-                ctx.beginPath();
-                ctx.moveTo(x, 0);
-                ctx.lineTo(x, height);
-                ctx.stroke();
+                ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, height); ctx.stroke();
             }
-            
-            // Draw Horizontal Lines
             for(let y = 0; y < height; y += gridSize) {
-                ctx.beginPath();
-                ctx.moveTo(0, y);
-                ctx.lineTo(width, y);
-                ctx.stroke();
+                ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(width, y); ctx.stroke();
             }
         }
 
-        // --- EVENT LISTENERS ---
+        function drawProcessorSlot() {
+            ctx.save();
+            ctx.translate(processorSlot.x, processorSlot.y);
+            
+            // Slot glow
+            ctx.shadowColor = config.accentCyan;
+            ctx.shadowBlur = 30;
+            ctx.fillStyle = "rgba(6, 182, 212, 0.2)";
+            ctx.fillRect(-processorSlot.width/2, -10, processorSlot.width, 20);
+            
+            ctx.strokeStyle = config.accentCyan;
+            ctx.lineWidth = 3;
+            ctx.strokeRect(-processorSlot.width/2, -10, processorSlot.width, 20);
+            
+            // Label
+            ctx.shadowBlur = 0;
+            ctx.fillStyle = config.accentCyan;
+            ctx.font = '10px Roboto Mono';
+            ctx.textAlign = 'center';
+            ctx.fillText("NEURAL PROCESSOR INPUT", 0, 25);
+            ctx.restore();
+        }
 
-        window.addEventListener('resize', resize);
+        function drawRobot() {
+            ctx.save();
+            ctx.translate(robot.base.x, robot.base.y);
 
-        window.addEventListener('mousemove', (e) => {
+            ctx.strokeStyle = config.armColor;
+            ctx.lineWidth = 4;
+            ctx.lineCap = 'round';
+            ctx.lineJoin = 'round';
+            ctx.shadowColor = config.armColor;
+            ctx.shadowBlur = 15;
+
+            // Base joint
+            ctx.beginPath(); ctx.arc(0,0, 15, 0, Math.PI*2); ctx.stroke();
+
+            // Upper Arm (L1)
+            ctx.rotate(robot.theta1);
+            ctx.beginPath(); ctx.moveTo(0,0); ctx.lineTo(robot.l1, 0); ctx.stroke();
+            
+            // Elbow Joint
+            ctx.translate(robot.l1, 0);
+            ctx.beginPath(); ctx.arc(0,0, 10, 0, Math.PI*2); ctx.stroke();
+
+            // Forearm (L2)
+            ctx.rotate(robot.theta2);
+            ctx.beginPath(); ctx.moveTo(0,0); ctx.lineTo(robot.l2, 0); ctx.stroke();
+
+            // Gripper (End Effector)
+            ctx.translate(robot.l2, 0);
+            drawGripper(robot.grippedBlock !== null);
+
+            ctx.restore();
+
+            // Draw target marker (debug/visual aid)
+            if(robot.state !== 'IDLE') {
+                ctx.beginPath();
+                ctx.arc(robot.target.x, robot.target.y, 5, 0, Math.PI*2);
+                ctx.fillStyle = config.accentPink;
+                ctx.fill();
+            }
+        }
+
+        function drawGripper(isGripping) {
+            ctx.shadowBlur = 5;
+            ctx.strokeStyle = isGripping ? config.accentPink : config.armColor;
+            const openAmount = isGripping ? 15 : 30;
+            
+            // Gripper base
+            ctx.strokeRect(-10, -15, 20, 30);
+            
+            // Fingers
+            ctx.beginPath();
+            ctx.moveTo(10, -15); ctx.lineTo(openAmount, -15); ctx.lineTo(openAmount + 10, -5);
+            ctx.moveTo(10, 15); ctx.lineTo(openAmount, 15); ctx.lineTo(openAmount + 10, 5);
+            ctx.stroke();
+        }
+
+        // --- UI & MODAL ---
+        const modal = document.getElementById('modal-overlay');
+        const closeBtn = document.getElementById('close-btn');
+        const cardTitle = document.getElementById('card-title');
+        const cardContent = document.getElementById('card-content');
+
+        function showModal(label) {
+            const data = contentData[label];
+            cardTitle.innerText = data.title;
+            cardContent.innerHTML = data.content;
+            modal.classList.add('active');
+        }
+
+        closeBtn.addEventListener('click', () => {
+            modal.classList.remove('active');
+        });
+
+        // --- INPUT HANDLING ---
+        canvas.addEventListener('mousemove', (e) => {
             mouse.x = e.clientX;
             mouse.y = e.clientY;
-
-            // Check hover state
-            let cursorStyle = 'default';
-            particles.forEach(p => {
-                const dx = mouse.x - p.pos.x;
-                const dy = mouse.y - p.pos.y;
-                const dist = Math.sqrt(dx*dx + dy*dy);
-                if (dist < p.radius) {
-                    p.hovered = true;
-                    cursorStyle = 'grab';
+            
+            // Hover detection
+            canvas.style.cursor = 'default';
+            blocks.forEach(b => {
+                if(mouse.x > b.pos.x - b.width/2 && mouse.x < b.pos.x + b.width/2 &&
+                   mouse.y > b.pos.y - b.height/2 && mouse.y < b.pos.y + b.height/2) {
+                    b.hovered = true;
+                    canvas.style.cursor = 'pointer';
                 } else {
-                    p.hovered = false;
-                }
-            });
-            document.body.style.cursor = mouse.dragging ? 'grabbing' : cursorStyle;
-        });
-
-        window.addEventListener('mousedown', (e) => {
-            mouse.isDown = true;
-            // Find clicked particle
-            particles.forEach(p => {
-                const dx = mouse.x - p.pos.x;
-                const dy = mouse.y - p.pos.y;
-                const dist = Math.sqrt(dx*dx + dy*dy);
-                if (dist < p.radius) {
-                    mouse.dragging = p;
-                    // Close card on drag start
-                    card.classList.remove('active');
+                    b.hovered = false;
                 }
             });
         });
 
-        window.addEventListener('mouseup', () => {
-            // Check if it was a click (minimal movement) or a drag
-            if (mouse.dragging) {
-                // If velocity is low, we treat it as a "Select" action
-                const speed = Math.sqrt(mouse.dragging.vel.x**2 + mouse.dragging.vel.y**2);
-                if (speed < 1) {
-                    openCard(mouse.dragging);
+        canvas.addEventListener('click', (e) => {
+            if(robot.state !== 'IDLE') return; // Busy
+
+            blocks.forEach(b => {
+                if(b.hovered) {
+                    robot.state = 'REACHING';
+                    robot.grippedBlock = b;
+                    // Target slightly above the center of the block for better visual grasp
+                    setRobotTarget(b.pos.x, b.pos.y);
                 }
-            }
-            mouse.isDown = false;
-            mouse.dragging = null;
+            });
         });
 
-        function openCard(particle) {
-            cardTitle.innerText = particle.data.title;
-            cardContent.innerHTML = particle.data.content;
-            card.classList.add('active');
-        }
-
-        // Close card when clicking outside
-        document.addEventListener('click', (e) => {
-            if(e.target.tagName === 'CANVAS' && !mouse.dragging) {
-                // Check if we clicked blank space
-                let clickedNode = false;
-                particles.forEach(p => {
-                    const dx = mouse.x - p.pos.x;
-                    const dy = mouse.y - p.pos.y;
-                    if(Math.sqrt(dx*dx + dy*dy) < p.radius) clickedNode = true;
-                });
-                
-                if(!clickedNode) card.classList.remove('active');
-            }
+        window.addEventListener('resize', () => {
+            resize();
+            // Re-initialize positions on resize for simplicity
+            init();
         });
 
         // Start
