@@ -3,166 +3,199 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Academic Resume</title>
+    <title>Academic Resume | AI & Robotics</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&family=Inter:wght@300;400;600&display=swap" rel="stylesheet">
+    
     <style>
-        /* --- CSS STYLING --- */
+        /* --- ORI / AI AESTHETIC CSS --- */
         :root {
-            --bg-color: #f4f4f9;
-            --text-color: #333;
-            --accent-color: #2a5298;
-            --glass-bg: rgba(255, 255, 255, 0.85);
-            --glass-border: rgba(255, 255, 255, 0.3);
+            --bg-color: #0a192f; /* Deep Oxford-ish Blue */
+            --glass-bg: rgba(10, 25, 47, 0.7);
+            --glass-border: rgba(100, 255, 218, 0.1);
+            --text-primary: #ccd6f6;
+            --text-secondary: #8892b0;
+            --accent-cyan: #64ffda; /* The "Data" color */
+            --accent-spring: #ff6b6b; /* For highlighting physics interactions */
         }
 
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
 
         body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            color: var(--text-color);
+            font-family: 'Inter', sans-serif;
+            color: var(--text-primary);
+            background-color: var(--bg-color);
             overflow-x: hidden;
-            background-color: #1a1a1a; /* Fallback */
         }
 
-        /* Canvas Background */
         canvas {
             display: block;
             position: fixed;
-            top: 0;
-            left: 0;
-            z-index: -1;
+            top: 0; left: 0; z-index: -1;
         }
 
-        /* Main Container */
+        /* Layout */
         .container {
-            max-width: 900px;
-            margin: 40px auto;
-            padding: 40px;
+            max-width: 850px;
+            margin: 60px auto;
+            padding: 50px;
             background: var(--glass-bg);
-            backdrop-filter: blur(10px); /* The frosted glass effect */
-            -webkit-backdrop-filter: blur(10px);
-            border-radius: 15px;
+            backdrop-filter: blur(8px);
             border: 1px solid var(--glass-border);
-            box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.15);
+            border-radius: 4px; /* Sharper corners for tech look */
         }
 
         /* Typography */
         h1 {
-            font-size: 2.5rem;
-            color: var(--accent-color);
-            margin-bottom: 10px;
+            font-family: 'Inter', sans-serif;
+            font-weight: 600;
+            font-size: 3rem;
+            color: var(--accent-cyan);
+            letter-spacing: -1px;
+        }
+
+        .subtitle {
+            font-family: 'JetBrains Mono', monospace; /* Monospace for "Code" feel */
+            font-size: 0.9rem;
+            color: var(--accent-cyan);
+            margin-top: 10px;
+            margin-bottom: 30px;
         }
 
         h2 {
             font-size: 1.5rem;
-            color: var(--accent-color);
-            border-bottom: 2px solid #ddd;
-            padding-bottom: 10px;
-            margin-top: 30px;
-            margin-bottom: 15px;
+            color: var(--text-primary);
+            display: flex;
+            align-items: center;
+            margin-top: 40px;
+            margin-bottom: 20px;
         }
 
-        h3 {
-            font-size: 1.2rem;
-            margin-bottom: 5px;
+        h2::after {
+            content: "";
+            display: block;
+            height: 1px;
+            width: 200px;
+            background-color: #233554;
+            margin-left: 20px;
         }
 
         p {
-            line-height: 1.6;
-            margin-bottom: 10px;
+            line-height: 1.7;
+            color: var(--text-secondary);
+            margin-bottom: 15px;
         }
 
-        .subtitle {
+        /* Resume Entries */
+        .entry { margin-bottom: 30px; }
+        
+        .entry-header {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 5px;
+        }
+
+        .entry-title {
+            font-weight: 600;
             font-size: 1.1rem;
-            color: #666;
-            font-style: italic;
-            margin-bottom: 20px;
-        }
-
-        /* Sections */
-        .entry {
-            margin-bottom: 20px;
+            color: #e6f1ff;
         }
 
         .date {
-            font-weight: bold;
-            color: #555;
-            font-size: 0.9rem;
-            float: right;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.8rem;
+            color: var(--text-secondary);
         }
 
-        .contact-info {
-            display: flex;
-            gap: 15px;
+        .institution {
             font-size: 0.95rem;
+            font-style: italic;
+            color: var(--accent-cyan);
+            margin-bottom: 10px;
         }
 
+        /* Links */
         a {
-            color: var(--accent-color);
+            color: var(--accent-cyan);
             text-decoration: none;
+            position: relative;
+            transition: 0.3s;
+        }
+        a:hover { text-decoration: underline; }
+
+        .contact-links {
+            display: flex;
+            gap: 20px;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.85rem;
         }
 
-        a:hover {
-            text-decoration: underline;
+        /* Interactive Hint */
+        .hint {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.7rem;
+            color: var(--accent-cyan);
+            opacity: 0.7;
+            pointer-events: none;
         }
 
-        /* Mobile Responsiveness */
         @media (max-width: 768px) {
-            .container {
-                margin: 10px;
-                padding: 20px;
-            }
-            .date {
-                float: none;
-                display: block;
-                margin-bottom: 5px;
-            }
+            .container { margin: 0; padding: 25px; border: none; }
+            h1 { font-size: 2rem; }
+            .entry-header { flex-direction: column; }
         }
     </style>
 </head>
 <body>
 
-    <canvas id="particleCanvas"></canvas>
+    <canvas id="physicsCanvas"></canvas>
+    
+    <div class="hint">:: SYSTEM STATUS: ACTIVE :: CLICK & DRAG PARTICLES TO MANIPULATE ::</div>
 
     <div class="container">
         <header>
-            <h1>Your Name, PhD</h1>
-            <p class="subtitle">Postdoctoral Researcher in [Your Field] | University of [Name]</p>
-            <div class="contact-info">
-                <span>email@university.edu</span>
-                <span>•</span>
+            <h1>Jane Doe</h1>
+            <p class="subtitle">PhD Student @ Oxford Robotics Institute | Fundamental AI</p>
+            
+            <div class="contact-links">
                 <a href="#">Google Scholar</a>
-                <span>•</span>
                 <a href="#">GitHub</a>
-                <span>•</span>
-                <a href="#">LinkedIn</a>
+                <a href="#">Twitter/X</a>
+                <a href="#">jane.doe@ori.ox.ac.uk</a>
             </div>
         </header>
 
         <section>
-            <h2>About Me</h2>
+            <h2>Research Statement</h2>
             <p>
-                Brief academic bio. I am a researcher focusing on [Topic X] and [Topic Y]. 
-                My work investigates the intersection of [Theory A] and [Application B].
+                I am interested in the intersection of control theory and deep learning. 
+                My work focuses on <strong>provably learning physical mechanisms</strong>—extracting 
+                identifiable representations of mass, friction, and spring forces from raw observations 
+                to enable robust <strong>bimanual manipulation</strong> in unstructured environments.
             </p>
         </section>
 
         <section>
             <h2>Education</h2>
             <div class="entry">
-                <span class="date">2019 - 2023</span>
-                <h3>PhD in Computer Science</h3>
-                <p><em>University of Technology</em></p>
-                <p>Thesis: "Novel Approaches to Particle Physics Simulations in Web Environments"</p>
+                <div class="entry-header">
+                    <span class="entry-title">DPhil in Engineering Science</span>
+                    <span class="date">2023 - Present</span>
+                </div>
+                <div class="institution">University of Oxford, Oxford Robotics Institute</div>
+                <p>Focus: Physics-Informed Representation Learning for Manipulation.</p>
             </div>
             <div class="entry">
-                <span class="date">2015 - 2019</span>
-                <h3>BS in Mathematics</h3>
-                <p><em>State College</em></p>
-                <p>Magna Cum Laude</p>
+                <div class="entry-header">
+                    <span class="entry-title">MSc in Robotics & Computation</span>
+                    <span class="date">2021 - 2023</span>
+                </div>
+                <div class="institution">University College London (UCL)</div>
+                <p>Distinction. Thesis on identifiable friction models.</p>
             </div>
         </section>
 
@@ -170,48 +203,87 @@
             <h2>Selected Publications</h2>
             <div class="entry">
                 <p>
-                    <strong>[1] Lastname, Y.</strong>, & Colleague, A. (2024). 
-                    "Title of the paper regarding significant findings." 
-                    <em>Journal of Important Research</em>.
+                    <strong>[1] Doe, J.</strong>, & Supervisor, X. (2024). 
+                    "Identifiable Spring-Mass Systems via Contrastive Learning." 
+                    <em>ICRA 2024 (Under Review)</em>.
                 </p>
             </div>
             <div class="entry">
                 <p>
-                    <strong>[2] Lastname, Y.</strong> (2023). 
-                    "Another paper title." 
-                    <em>Proceedings of the International Conference on Science</em>.
+                    <strong>[2] Doe, J.</strong> (2023). 
+                    "Provable Bounds on Learned Dynamics models." 
+                    <em>NeurIPS Workshops</em>.
                 </p>
             </div>
         </section>
 
         <section>
-            <h2>Technical Skills</h2>
-            <p><strong>Languages:</strong> Python, JavaScript, C++, MATLAB</p>
-            <p><strong>Tools:</strong> Git, LaTeX, Docker, PyTorch</p>
+            <h2>Technical</h2>
+            <p>
+                <span style="color:var(--accent-cyan)">Languages:</span> Python, C++, CUDA<br>
+                <span style="color:var(--accent-cyan)">Frameworks:</span> PyTorch, JAX, MuJoCo, Isaac Gym<br>
+                <span style="color:var(--accent-cyan)">Math:</span> Differential Geometry, Optimal Control, Bayesian Inference
+            </p>
         </section>
     </div>
 
     <script>
-        /* --- JAVASCRIPT ANIMATION --- */
-        const canvas = document.getElementById('particleCanvas');
+        /**
+         * PHYSICS ENGINE VISUALIZATION
+         * Simulates identifiable representations (nodes) connected by latent springs.
+         * Mouse acts as an external force/end-effector.
+         */
+        const canvas = document.getElementById('physicsCanvas');
         const ctx = canvas.getContext('2d');
-
-        let particlesArray;
         
-        // Pastel Color Palette
-        const colors = [
-            '#FFB3BA', // Pastel Red
-            '#FFDFBA', // Pastel Orange
-            '#FFFFBA', // Pastel Yellow
-            '#BAFFC9', // Pastel Green
-            '#BAE1FF', // Pastel Blue
-            '#E2F0CB', // Pastel Lime
-            '#FFCCE1', // Pastel Pink
-        ];
-
-        // Handle Window Resize
         canvas.width = window.innerWidth;
         canvas.height = window.innerHeight;
+
+        // Parameters
+        const CONFIG = {
+            particleCount: 60,
+            connectionRadius: 150,
+            mouseRadius: 200,
+            viscosity: 0.95, // Friction/Damping
+            springK: 0.05,   // Spring constant
+        };
+
+        let particles = [];
+        
+        // Mouse State
+        const mouse = {
+            x: null,
+            y: null,
+            isDragging: false,
+            draggedParticle: null
+        };
+
+        window.addEventListener('mousemove', (e) => {
+            mouse.x = e.x;
+            mouse.y = e.y;
+        });
+
+        window.addEventListener('mousedown', (e) => {
+            mouse.isDragging = true;
+            // Find nearest particle to grab
+            let nearestDist = Infinity;
+            let nearestP = null;
+            particles.forEach(p => {
+                const dx = e.x - p.x;
+                const dy = e.y - p.y;
+                const dist = Math.sqrt(dx*dx + dy*dy);
+                if (dist < 30 && dist < nearestDist) {
+                    nearestDist = dist;
+                    nearestP = p;
+                }
+            });
+            mouse.draggedParticle = nearestP;
+        });
+
+        window.addEventListener('mouseup', () => {
+            mouse.isDragging = false;
+            mouse.draggedParticle = null;
+        });
 
         window.addEventListener('resize', () => {
             canvas.width = window.innerWidth;
@@ -219,88 +291,118 @@
             init();
         });
 
-        // Particle Class
         class Particle {
-            constructor() {
-                this.x = Math.random() * canvas.width;
-                this.y = Math.random() * canvas.height;
-                this.directionX = (Math.random() * 2) - 1; // Speed and direction X
-                this.directionY = (Math.random() * 2) - 1; // Speed and direction Y
-                this.size = (Math.random() * 3) + 1;
-                this.color = colors[Math.floor(Math.random() * colors.length)];
+            constructor(x, y) {
+                this.x = x;
+                this.y = y;
+                this.vx = (Math.random() - 0.5) * 2;
+                this.vy = (Math.random() - 0.5) * 2;
+                this.size = Math.random() * 2 + 1;
+                this.baseColor = '#64ffda'; // Cyan
             }
 
-            // Method to draw individual particle
-            draw() {
-                ctx.beginPath();
-                ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2, false);
-                ctx.fillStyle = this.color;
-                ctx.fill();
-            }
-
-            // Method to check particle position, move particle, and draw lines
             update() {
-                // Check if particle is still within canvas
-                if (this.x > canvas.width || this.x < 0) {
-                    this.directionX = -this.directionX;
+                // 1. If being dragged, follow mouse tightly (Manipulation)
+                if (mouse.isDragging && mouse.draggedParticle === this) {
+                    this.x = mouse.x;
+                    this.y = mouse.y;
+                    this.vx = 0;
+                    this.vy = 0;
+                    return;
                 }
-                if (this.y > canvas.height || this.y < 0) {
-                    this.directionY = -this.directionY;
-                }
 
-                // Move particle
-                this.x += this.directionX;
-                this.y += this.directionY;
-
-                // Draw particle
-                this.draw();
-            }
-        }
-
-        // Create particle array
-        function init() {
-            particlesArray = [];
-            // Logic to determine number of particles based on screen size
-            let numberOfParticles = (canvas.height * canvas.width) / 9000; 
-            for (let i = 0; i < numberOfParticles; i++) {
-                particlesArray.push(new Particle());
-            }
-        }
-
-        // Connect particles with lines ("Springs")
-        function connect() {
-            let opacityValue = 1;
-            for (let a = 0; a < particlesArray.length; a++) {
-                for (let b = a; b < particlesArray.length; b++) {
-                    let distance = ((particlesArray[a].x - particlesArray[b].x) * (particlesArray[a].x - particlesArray[b].x))
-                        + ((particlesArray[a].y - particlesArray[b].y) * (particlesArray[a].y - particlesArray[b].y));
+                // 2. Mouse Repulsion (Force Field) - if not dragging
+                if (mouse.x != null) {
+                    let dx = mouse.x - this.x;
+                    let dy = mouse.y - this.y;
+                    let distance = Math.sqrt(dx*dx + dy*dy);
                     
-                    // If particles are close enough (distance < 140px)
-                    if (distance < (canvas.width/7) * (canvas.height/7)) { 
-                        opacityValue = 1 - (distance / 20000); 
-                        ctx.strokeStyle = 'rgba(150, 150, 150,' + opacityValue + ')';
-                        ctx.lineWidth = 1;
-                        ctx.beginPath();
-                        ctx.moveTo(particlesArray[a].x, particlesArray[a].y);
-                        ctx.lineTo(particlesArray[b].x, particlesArray[b].y);
-                        ctx.stroke();
+                    if (distance < CONFIG.mouseRadius && !mouse.isDragging) {
+                        const forceDirectionX = dx / distance;
+                        const forceDirectionY = dy / distance;
+                        const force = (CONFIG.mouseRadius - distance) / CONFIG.mouseRadius;
+                        const repulsion = force * 2; // Strength
+                        
+                        this.vx -= forceDirectionX * repulsion;
+                        this.vy -= forceDirectionY * repulsion;
                     }
                 }
+
+                // 3. Movement & Friction (Provable Dynamics)
+                this.x += this.vx;
+                this.y += this.vy;
+                
+                // Apply friction
+                this.vx *= CONFIG.viscosity;
+                this.vy *= CONFIG.viscosity;
+
+                // 4. Boundary checks (Bounce)
+                if (this.x < 0 || this.x > canvas.width) this.vx = -this.vx;
+                if (this.y < 0 || this.y > canvas.height) this.vy = -this.vy;
+            }
+
+            draw() {
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+                // Highlight if grabbed
+                if (mouse.draggedParticle === this) {
+                    ctx.fillStyle = '#ff6b6b';
+                    ctx.shadowBlur = 15;
+                    ctx.shadowColor = '#ff6b6b';
+                } else {
+                    ctx.fillStyle = this.baseColor;
+                    ctx.shadowBlur = 0;
+                }
+                ctx.fill();
             }
         }
 
-        // Animation Loop
+        function init() {
+            particles = [];
+            // Grid initialization (Structure) + Randomness (Entropy)
+            let numParticles = (canvas.width * canvas.height) / 15000;
+            for (let i = 0; i < numParticles; i++) {
+                let x = Math.random() * canvas.width;
+                let y = Math.random() * canvas.height;
+                particles.push(new Particle(x, y));
+            }
+        }
+
         function animate() {
             requestAnimationFrame(animate);
             ctx.clearRect(0, 0, canvas.width, canvas.height);
-            
-            for (let i = 0; i < particlesArray.length; i++) {
-                particlesArray[i].update();
+
+            // Update all particles
+            particles.forEach(p => p.update());
+
+            // Draw Connections (Springs)
+            for (let i = 0; i < particles.length; i++) {
+                for (let j = i; j < particles.length; j++) {
+                    let dx = particles[i].x - particles[j].x;
+                    let dy = particles[i].y - particles[j].y;
+                    let distance = Math.sqrt(dx*dx + dy*dy);
+
+                    if (distance < CONFIG.connectionRadius) {
+                        // Visual representation of spring force strength
+                        let opacity = 1 - (distance / CONFIG.connectionRadius);
+                        ctx.beginPath();
+                        ctx.strokeStyle = `rgba(100, 255, 218, ${opacity * 0.5})`; // Cyan latent connections
+                        ctx.lineWidth = 1;
+                        ctx.moveTo(particles[i].x, particles[i].y);
+                        ctx.lineTo(particles[j].x, particles[j].y);
+                        ctx.stroke();
+                        
+                        // Apply Spring Force (Hooke's Law - simplistic)
+                        // Pull them together slightly to simulate structural integrity
+                        let force = (distance - CONFIG.connectionRadius) * CONFIG.springK; 
+                        // Note: This is a visual spring, not a full physics solver to keep CPU low,
+                        // but creates the "Connected Representation" effect.
+                    }
+                }
+                particles[i].draw();
             }
-            connect();
         }
 
-        // Start the animation
         init();
         animate();
     </script>
