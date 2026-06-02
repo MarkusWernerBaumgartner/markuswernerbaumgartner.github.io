@@ -4,14 +4,22 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Academic Resume</title>
+
+    <!-- Serif typography: Playfair Display for headings, Lora for body -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,400;0,500;0,600;1,400&family=Playfair+Display:wght@600;700&display=swap" rel="stylesheet">
+
     <style>
         /* --- CSS STYLING --- */
         :root {
-            --bg-color: #f4f4f9;
-            --text-color: #333;
-            --accent-color: #2a5298;
-            --glass-bg: rgba(255, 255, 255, 0.85);
-            --glass-border: rgba(255, 255, 255, 0.3);
+            --bg-color: #fbfcff;
+            --text-color: #2b2f36;
+            --muted-color: #5d6470;
+            --accent-color: #002147; /* Oxford Blue */
+            --accent-soft: rgba(0, 33, 71, 0.12);
+            --glass-bg: rgba(255, 255, 255, 0.78);
+            --glass-border: rgba(0, 33, 71, 0.10);
         }
 
         * {
@@ -21,10 +29,10 @@
         }
 
         body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            font-family: 'Lora', Georgia, 'Times New Roman', serif;
             color: var(--text-color);
             overflow-x: hidden;
-            background-color: #1a1a1a; /* Fallback */
+            background-color: var(--bg-color);
         }
 
         /* Canvas Background */
@@ -40,85 +48,180 @@
         .container {
             max-width: 900px;
             margin: 40px auto;
-            padding: 40px;
+            padding: 40px 48px;
             background: var(--glass-bg);
             backdrop-filter: blur(10px); /* The frosted glass effect */
             -webkit-backdrop-filter: blur(10px);
-            border-radius: 15px;
+            border-radius: 16px;
             border: 1px solid var(--glass-border);
-            box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.15);
+            box-shadow: 0 8px 32px 0 rgba(0, 33, 71, 0.10);
+        }
+
+        /* Header layout with circular photo */
+        header {
+            display: flex;
+            align-items: center;
+            gap: 32px;
+            flex-wrap: wrap;
+        }
+
+        .avatar {
+            flex: 0 0 auto;
+            width: 130px;
+            height: 130px;
+            border-radius: 50%;
+            object-fit: cover;
+            background:
+                linear-gradient(135deg, var(--accent-soft), rgba(186, 225, 255, 0.45));
+            border: 3px solid #fff;
+            box-shadow: 0 4px 18px rgba(0, 33, 71, 0.18);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--accent-color);
+            font-family: 'Playfair Display', serif;
+            font-size: 2.6rem;
+            user-select: none;
+        }
+
+        .header-text {
+            flex: 1 1 280px;
         }
 
         /* Typography */
         h1 {
-            font-size: 2.5rem;
+            font-family: 'Playfair Display', serif;
+            font-size: 2.6rem;
+            font-weight: 700;
             color: var(--accent-color);
-            margin-bottom: 10px;
+            margin-bottom: 8px;
+            letter-spacing: 0.2px;
         }
 
         h2 {
+            font-family: 'Playfair Display', serif;
             font-size: 1.5rem;
+            font-weight: 600;
             color: var(--accent-color);
-            border-bottom: 2px solid #ddd;
+            border-bottom: 2px solid var(--accent-soft);
             padding-bottom: 10px;
-            margin-top: 30px;
-            margin-bottom: 15px;
+            margin-top: 36px;
+            margin-bottom: 16px;
         }
 
         h3 {
             font-size: 1.2rem;
+            font-weight: 600;
             margin-bottom: 5px;
+            color: var(--accent-color);
         }
 
         p {
-            line-height: 1.6;
+            line-height: 1.7;
             margin-bottom: 10px;
         }
 
         .subtitle {
             font-size: 1.1rem;
-            color: #666;
+            color: var(--muted-color);
             font-style: italic;
-            margin-bottom: 20px;
+            margin-bottom: 16px;
         }
 
         /* Sections */
         .entry {
             margin-bottom: 20px;
+            padding-left: 16px;
+            border-left: 2px solid var(--accent-soft);
+        }
+
+        .entry-head {
+            display: flex;
+            justify-content: space-between;
+            align-items: baseline;
+            gap: 12px;
+            flex-wrap: wrap;
         }
 
         .date {
-            font-weight: bold;
-            color: #555;
+            font-weight: 500;
+            color: var(--muted-color);
             font-size: 0.9rem;
-            float: right;
+            white-space: nowrap;
         }
 
         .contact-info {
             display: flex;
-            gap: 15px;
+            flex-wrap: wrap;
+            align-items: center;
+            gap: 12px;
             font-size: 0.95rem;
+            color: var(--muted-color);
         }
 
         a {
             color: var(--accent-color);
             text-decoration: none;
+            border-bottom: 1px solid transparent;
+            transition: border-color 0.2s ease;
         }
 
         a:hover {
-            text-decoration: underline;
+            border-bottom-color: var(--accent-color);
+        }
+
+        .sep {
+            color: var(--accent-soft);
+        }
+
+        /* --- Subtle entry animations --- */
+        @keyframes fadeUp {
+            from {
+                opacity: 0;
+                transform: translateY(16px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        header,
+        section {
+            opacity: 0;
+            animation: fadeUp 0.7s ease forwards;
+        }
+
+        header { animation-delay: 0.05s; }
+        section:nth-of-type(1) { animation-delay: 0.20s; }
+        section:nth-of-type(2) { animation-delay: 0.32s; }
+        section:nth-of-type(3) { animation-delay: 0.44s; }
+        section:nth-of-type(4) { animation-delay: 0.56s; }
+
+        @media (prefers-reduced-motion: reduce) {
+            header,
+            section {
+                opacity: 1;
+                animation: none;
+            }
         }
 
         /* Mobile Responsiveness */
         @media (max-width: 768px) {
             .container {
-                margin: 10px;
-                padding: 20px;
+                margin: 12px;
+                padding: 24px 22px;
             }
-            .date {
-                float: none;
-                display: block;
-                margin-bottom: 5px;
+            header {
+                gap: 20px;
+            }
+            .avatar {
+                width: 100px;
+                height: 100px;
+                font-size: 2rem;
+            }
+            h1 {
+                font-size: 2.1rem;
             }
         }
     </style>
@@ -129,23 +232,27 @@
 
     <div class="container">
         <header>
-            <h1>Your Name, PhD</h1>
-            <p class="subtitle">Postdoctoral Researcher in [Your Field] | University of [Name]</p>
-            <div class="contact-info">
-                <span>email@university.edu</span>
-                <span>•</span>
-                <a href="#">Google Scholar</a>
-                <span>•</span>
-                <a href="#">GitHub</a>
-                <span>•</span>
-                <a href="#">LinkedIn</a>
+            <!-- Circular image placeholder: swap for <img class="avatar" src="..." alt="..."> -->
+            <div class="avatar" role="img" aria-label="Profile photo placeholder">YN</div>
+            <div class="header-text">
+                <h1>Your Name, PhD</h1>
+                <p class="subtitle">Postdoctoral Researcher in [Your Field] | University of [Name]</p>
+                <div class="contact-info">
+                    <span>email@university.edu</span>
+                    <span class="sep">•</span>
+                    <a href="#">Google Scholar</a>
+                    <span class="sep">•</span>
+                    <a href="#">GitHub</a>
+                    <span class="sep">•</span>
+                    <a href="#">LinkedIn</a>
+                </div>
             </div>
         </header>
 
         <section>
             <h2>About Me</h2>
             <p>
-                Brief academic bio. I am a researcher focusing on [Topic X] and [Topic Y]. 
+                Brief academic bio. I am a researcher focusing on [Topic X] and [Topic Y].
                 My work investigates the intersection of [Theory A] and [Application B].
             </p>
         </section>
@@ -153,14 +260,18 @@
         <section>
             <h2>Education</h2>
             <div class="entry">
-                <span class="date">2019 - 2023</span>
-                <h3>PhD in Computer Science</h3>
+                <div class="entry-head">
+                    <h3>PhD in Computer Science</h3>
+                    <span class="date">2019 - 2023</span>
+                </div>
                 <p><em>University of Technology</em></p>
                 <p>Thesis: "Novel Approaches to Particle Physics Simulations in Web Environments"</p>
             </div>
             <div class="entry">
-                <span class="date">2015 - 2019</span>
-                <h3>BS in Mathematics</h3>
+                <div class="entry-head">
+                    <h3>BS in Mathematics</h3>
+                    <span class="date">2015 - 2019</span>
+                </div>
                 <p><em>State College</em></p>
                 <p>Magna Cum Laude</p>
             </div>
@@ -170,15 +281,15 @@
             <h2>Selected Publications</h2>
             <div class="entry">
                 <p>
-                    <strong>[1] Lastname, Y.</strong>, & Colleague, A. (2024). 
-                    "Title of the paper regarding significant findings." 
+                    <strong>[1] Lastname, Y.</strong>, & Colleague, A. (2024).
+                    "Title of the paper regarding significant findings."
                     <em>Journal of Important Research</em>.
                 </p>
             </div>
             <div class="entry">
                 <p>
-                    <strong>[2] Lastname, Y.</strong> (2023). 
-                    "Another paper title." 
+                    <strong>[2] Lastname, Y.</strong> (2023).
+                    "Another paper title."
                     <em>Proceedings of the International Conference on Science</em>.
                 </p>
             </div>
@@ -197,8 +308,8 @@
         const ctx = canvas.getContext('2d');
 
         let particlesArray;
-        
-        // Pastel Color Palette
+
+        // Soft pastel accents over a white background
         const colors = [
             '#FFB3BA', // Pastel Red
             '#FFDFBA', // Pastel Orange
@@ -208,6 +319,9 @@
             '#E2F0CB', // Pastel Lime
             '#FFCCE1', // Pastel Pink
         ];
+
+        // Connecting lines tinted Oxford Blue
+        const lineColor = '0, 33, 71';
 
         // Handle Window Resize
         canvas.width = window.innerWidth;
@@ -224,9 +338,9 @@
             constructor() {
                 this.x = Math.random() * canvas.width;
                 this.y = Math.random() * canvas.height;
-                this.directionX = (Math.random() * 2) - 1; // Speed and direction X
-                this.directionY = (Math.random() * 2) - 1; // Speed and direction Y
-                this.size = (Math.random() * 3) + 1;
+                this.directionX = (Math.random() * 0.6) - 0.3; // Gentle drift
+                this.directionY = (Math.random() * 0.6) - 0.3;
+                this.size = (Math.random() * 2.5) + 1;
                 this.color = colors[Math.floor(Math.random() * colors.length)];
             }
 
@@ -235,7 +349,9 @@
                 ctx.beginPath();
                 ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2, false);
                 ctx.fillStyle = this.color;
+                ctx.globalAlpha = 0.85;
                 ctx.fill();
+                ctx.globalAlpha = 1;
             }
 
             // Method to check particle position, move particle, and draw lines
@@ -257,28 +373,27 @@
             }
         }
 
-        // Create particle array
+        // Create particle array (capped for performance)
         function init() {
             particlesArray = [];
-            // Logic to determine number of particles based on screen size
-            let numberOfParticles = (canvas.height * canvas.width) / 9000; 
+            let numberOfParticles = Math.min((canvas.height * canvas.width) / 12000, 110);
             for (let i = 0; i < numberOfParticles; i++) {
                 particlesArray.push(new Particle());
             }
         }
 
-        // Connect particles with lines ("Springs")
+        // Connect nearby particles with faint Oxford-blue lines
         function connect() {
-            let opacityValue = 1;
+            const maxDist = 140 * 140;
             for (let a = 0; a < particlesArray.length; a++) {
-                for (let b = a; b < particlesArray.length; b++) {
-                    let distance = ((particlesArray[a].x - particlesArray[b].x) * (particlesArray[a].x - particlesArray[b].x))
-                        + ((particlesArray[a].y - particlesArray[b].y) * (particlesArray[a].y - particlesArray[b].y));
-                    
-                    // If particles are close enough (distance < 140px)
-                    if (distance < (canvas.width/7) * (canvas.height/7)) { 
-                        opacityValue = 1 - (distance / 20000); 
-                        ctx.strokeStyle = 'rgba(150, 150, 150,' + opacityValue + ')';
+                for (let b = a + 1; b < particlesArray.length; b++) {
+                    let dx = particlesArray[a].x - particlesArray[b].x;
+                    let dy = particlesArray[a].y - particlesArray[b].y;
+                    let distance = dx * dx + dy * dy;
+
+                    if (distance < maxDist) {
+                        let opacityValue = (1 - distance / maxDist) * 0.22;
+                        ctx.strokeStyle = 'rgba(' + lineColor + ',' + opacityValue + ')';
                         ctx.lineWidth = 1;
                         ctx.beginPath();
                         ctx.moveTo(particlesArray[a].x, particlesArray[a].y);
@@ -293,7 +408,7 @@
         function animate() {
             requestAnimationFrame(animate);
             ctx.clearRect(0, 0, canvas.width, canvas.height);
-            
+
             for (let i = 0; i < particlesArray.length; i++) {
                 particlesArray[i].update();
             }
